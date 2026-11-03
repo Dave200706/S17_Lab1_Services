@@ -19,7 +19,9 @@ namespace ZombieParty.Service
             /* Set<T>() est une methide qui retourne le DbSet correspondant sans avoir à renommer explicitement. Par exemple, si le type T est Zombie, Set<T>() retournera le DSet Zombies. */
             await _dbContext.Set<T>().AddAsync(entity);
             await _dbContext.SaveChangesAsync();
+
             return entity;
+
         }
 
         public virtual async Task DeleteAsync(int id)
