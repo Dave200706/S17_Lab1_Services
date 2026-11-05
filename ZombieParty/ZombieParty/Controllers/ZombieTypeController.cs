@@ -12,10 +12,12 @@ namespace ZombieParty.Controllers
     public class ZombieTypeController : Controller
     {
         private IZombieTypeService _serviceZT { get; set; }
+        private ZombieService _serviceZS { get; set; }
 
-        public ZombieTypeController(IZombieTypeService serviceZT)
+        public ZombieTypeController(IZombieTypeService serviceZT, ZombieService serviceZS)
         {
             _serviceZT = serviceZT;
+            _serviceZS = serviceZS;
         }
 
         public async Task<IActionResult> Index()
@@ -25,21 +27,30 @@ namespace ZombieParty.Controllers
             return View(zombieTypesList);
         }
 
-        //public async Task<IActionResult> Details(int id)
-        //{
-        //    var zombies = await _baseDonnees.Zombies.Where(z => z.ZombieTypeId == id).ToListAsync();
+        public async Task<IActionResult> Details(int id)
+        {
+            var zombieType = await _serviceZT.GetByIdAsync(id);
 
-        //    ZombieTypeVM zombieTypeVM = new()
-        //    {
-        //        ZombieType = new(),
-        //        ZombiesList = zombies,
-        //        ZombiesCount = zombies.Count(),
-        //        PointsAverage = zombies.Average(p => p.Point)
-        //    };
+            if (zombieType == null)
+            {
+                return NotFound();
+            }
 
-        //    zombieTypeVM.ZombieType = await _baseDonnees.ZombieTypes.FirstOrDefaultAsync(zt => zt.Id == id);
-        //    return View(zombieTypeVM);
-        //}
+            var zombies = (await _serviceZS.GetAllZombieTypeAsync(id)).ToList();
+
+            ZombieTypeVM zombieTypeVM = new()
+            {
+                ZombieType = zombieType,
+                ZombiesList = zombies, 
+                ZombiesCount = zombies.Count, 
+                PointsAverage = zombies.Any() ? zombies.Average(p => p.Point) : 0
+            };
+
+            return View(zombieTypeVM);
+
+            
+        }
+
 
 
         //GET CREATE
@@ -48,7 +59,7 @@ namespace ZombieParty.Controllers
             //ici pas grand intérêt à la mettre async
             return View();
         }
-
+        
         //POST
         [HttpPost]
         [ValidateAntiForgeryToken]
